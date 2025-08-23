@@ -23,6 +23,7 @@ const authRoutes = require('./routes/authRoutes');
 const examRoutes = require('./routes/examRoutes'); // <-- added
 
 app.use('/api/auth', authRoutes);
+console.log("ExamRoutes:", examRoutes);
 app.use('/api/exam', examRoutes); // <-- mounted exam routes
 
 // ✅ Test route
