@@ -2,12 +2,17 @@ const Question = require('../models/Question');
 
 
 exports.getQuestions = async (req, res) => {
-try {
-const questions = await Question.aggregate([{ $sample: { size: 5 } }]);
-res.json(questions);
-} catch (err) {
-res.status(500).json({ error: err.message });
-}
+  try {
+    const total = await Question.countDocuments();
+    if (total === 0) {
+      return res.status(404).json({ message: "No questions available" });
+    }
+
+    const questions = await Question.aggregate([{ $sample: { size: Math.min(5, total) } }]);
+    res.json(questions);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 

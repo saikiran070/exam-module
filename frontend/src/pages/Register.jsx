@@ -3,92 +3,72 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-  });
-  const [message, setMessage] = useState(""); // ✅ Success/Error messages
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    setMessage(""); // reset before each request
-
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/register", formData);
-
-      if (res.status === 201 || res.status === 200) {
-        setMessage("✅ Registration successful! Redirecting to login...");
-        setTimeout(() => navigate("/login"), 2000); // redirect after 2s
-      }
+      await axios.post("http://localhost:5001/api/auth/register", {
+        name,
+        email,
+        password,
+      });
+      alert("Registration successful! Please login.");
+      navigate("/login");
     } catch (err) {
-      if (err.response) {
-        setMessage(`❌ ${err.response.data.message || "Registration failed"}`);
-      } else {
-        setMessage("❌ Server not responding. Try again later.");
-      }
+      alert(err.response?.data?.msg || "Registration failed");
     }
   };
 
   return (
     <div className="flex justify-center items-center h-screen bg-gray-100">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-lg w-96"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
-
-        <input
-          type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-          required
-          className="w-full p-3 mb-4 border rounded-lg"
-        />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          className="w-full p-3 mb-4 border rounded-lg"
-        />
-
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          className="w-full p-3 mb-4 border rounded-lg"
-        />
-
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600"
-        >
-          Register
-        </button>
-
-        {message && (
-          <p className="mt-4 text-center text-sm font-medium text-red-500">
-            {message}
-          </p>
-        )}
-      </form>
+      <div className="bg-white shadow-xl rounded-2xl w-96 p-8">
+        <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+        <form onSubmit={handleRegister} className="space-y-4">
+          <input
+            type="text"
+            placeholder="Full Name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-300"
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-300"
+            required
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring focus:ring-green-300"
+            required
+          />
+          <button
+            type="submit"
+            className="w-full bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
+          >
+            Register
+          </button>
+        </form>
+        <p className="text-center text-sm mt-4">
+          Already have an account?{" "}
+          <span
+            onClick={() => navigate("/login")}
+            className="text-green-600 cursor-pointer"
+          >
+            Login
+          </span>
+        </p>
+      </div>
     </div>
   );
 };

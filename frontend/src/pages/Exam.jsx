@@ -15,7 +15,7 @@ const Exam = () => {
     const fetchQuestions = async () => {
       try {
         const token = localStorage.getItem("token"); // stored after login
-        const res = await axios.get("http://localhost:5000/api/exam/questions", {
+        const res = await axios.get("http://localhost:5001/api/exam/questions", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setQuestions(res.data);
@@ -39,7 +39,7 @@ const Exam = () => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        "http://localhost:5000/api/exam/submit",
+        "http://localhost:5001/api/exam/submit",
         { answers },
         { headers: { Authorization: `Bearer ${token}` } }
       );

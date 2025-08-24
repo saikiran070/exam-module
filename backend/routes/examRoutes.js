@@ -1,14 +1,12 @@
 const express = require('express');
-const { getQuestions, submitExam } = require('../controllers/examController');
-const auth = require('../middleware/authMiddleware');
 
 const router = express.Router();
+const examController = require('../controllers/examController');
 
+// GET 5 random questions
+router.get('/questions', examController.getQuestions);
 
-router.get('/questions', auth, getQuestions);
-
-
-router.post('/submit', auth, submitExam);
-
+// Submit answers
+router.post('/submit', examController.submitExam);
 
 module.exports = router;
