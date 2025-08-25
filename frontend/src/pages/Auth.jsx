@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function Auth() {
-  const [isLogin, setIsLogin] = useState(true); // toggle between login/register
+  const [isLogin, setIsLogin] = useState(true);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -36,13 +36,12 @@ export default function Auth() {
         setMessage(data.message || "Something went wrong");
       } else {
         if (isLogin) {
-          // Login successful → save token and redirect
           localStorage.setItem("token", data.token);
           setMessage("✅ Login successful!");
-          navigate("/exam"); // redirect to exam
+          navigate("/exam");
         } else {
           setMessage("✅ Registration successful! You can now log in.");
-          setIsLogin(true); // switch to login after register
+          setIsLogin(true);
         }
       }
     } catch (err) {
@@ -52,36 +51,36 @@ export default function Auth() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-900">
-      <div className="bg-gray-800 p-8 rounded-2xl shadow-lg w-96">
-        <h2 className="text-2xl font-bold text-white mb-6">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-900 via-indigo-900 to-blue-900 p-4">
+      <div className="bg-gray-800 p-10 rounded-3xl shadow-2xl w-full max-w-md transform hover:scale-105 transition-transform duration-300">
+        <h2 className="text-3xl font-extrabold text-white mb-6 text-center">
           {isLogin ? "Login" : "Register"}
         </h2>
 
         {message && (
-          <p className="mb-4 text-sm text-center text-red-400">{message}</p>
+          <p className="mb-4 text-center text-red-400 font-medium">{message}</p>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {!isLogin && (
             <input
               type="text"
               name="name"
-              placeholder="name"
+              placeholder="Full Name"
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none"
+              className="w-full px-5 py-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           )}
           <input
             type="email"
             name="email"
-            placeholder="Email"
+            placeholder="Email Address"
             value={formData.email}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none"
+            className="w-full px-5 py-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <input
             type="password"
@@ -90,21 +89,21 @@ export default function Auth() {
             value={formData.password}
             onChange={handleChange}
             required
-            className="w-full px-4 py-2 rounded bg-gray-700 text-white focus:outline-none"
+            className="w-full px-5 py-3 rounded-xl bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <button
             type="submit"
-            className="w-full py-2 rounded bg-blue-500 text-white font-semibold hover:bg-blue-600 transition"
+            className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-lg hover:from-indigo-600 hover:to-purple-600 transition-colors duration-300"
           >
             {isLogin ? "Login" : "Register"}
           </button>
         </form>
 
-        <p className="text-gray-400 text-sm mt-4 text-center">
+        <p className="text-gray-400 text-sm mt-6 text-center">
           {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
           <button
             onClick={() => setIsLogin(!isLogin)}
-            className="text-blue-400 hover:underline"
+            className="text-indigo-400 hover:text-indigo-200 font-medium"
           >
             {isLogin ? "Register" : "Login"}
           </button>
