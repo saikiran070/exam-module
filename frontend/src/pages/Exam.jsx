@@ -1,127 +1,104 @@
-import React, { useEffect, useState } from "react";
-import Timer from "../components/Timer";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import Timer from "../components/Timer";
 
-const Exam = () => {
+const Exam = ({ onExamSubmit }) => {
   const [questions, setQuestions] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
   const navigate = useNavigate();
 
-  // ✅ Fetch questions from backend
+  // Fetch questions from backend
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const token = localStorage.getItem("token"); // stored after login
+        const token = localStorage.getItem("token");
         const res = await axios.get("http://localhost:5001/api/exam/questions", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setQuestions(res.data);
-        setLoading(false);
+      // eslint-disable-next-line no-unused-vars
       } catch (err) {
-        console.error("Error fetching questions:", err);
-        setLoading(false);
+        setError("Failed to load questions");
       }
     };
-
     fetchQuestions();
   }, []);
 
-  // ✅ Handle option selection
-  const handleAnswer = (questionId, option) => {
-    setAnswers({ ...answers, [questionId]: option });
+  // Track selected answers
+  const handleChange = (id, optionIndex) => {
+    setAnswers({ ...answers, [id]: optionIndex });
   };
 
-  // ✅ Submit Exam
-  const handleSubmit = async () => {
+  // Submit exam answers
+  const handleSubmit = async (e) => {
+    e?.preventDefault();
+    setError("");
+
     try {
       const token = localStorage.getItem("token");
       const res = await axios.post(
         "http://localhost:5001/api/exam/submit",
-        { answers },
+        { answers }, // { questionId: selectedIndex }
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      navigate("/result", { state: { score: res.data.score, total: res.data.total } });
+      onExamSubmit(res.data); // save score or result in parent
+      setSubmitted(true);
+      navigate("/result"); // redirect to result page
     } catch (err) {
-      console.error("Error submitting exam:", err);
+      setError(err.response?.data?.message || "Submission failed");
     }
   };
 
-  if (loading) return <p className="text-center text-lg">Loading questions...</p>;
-
-  if (questions.length === 0)
-    return <p className="text-center text-lg">No questions available.</p>;
-
-  const currentQuestion = questions[currentIndex];
+  // Show message if already submitted
+  if (submitted) {
+    return (
+      <div className="p-6 max-w-lg mx-auto text-white">
+        <h2 className="text-2xl font-bold mb-4">Exam Submitted</h2>
+        <p>You have already completed the exam.</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center bg-gray-100 p-6">
-      {/* Timer */}
-      <div className="w-full flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">📘 Exam</h2>
-        <Timer duration={30 * 60} onTimeUp={handleSubmit} />
-      </div>
-
-      {/* Question Card */}
-      <div className="w-full max-w-2xl bg-white shadow-md rounded-lg p-6">
-        <h3 className="text-xl font-semibold mb-4">
-          Q{currentIndex + 1}. {currentQuestion.question}
-        </h3>
-
-        <ul className="space-y-3">
-          {currentQuestion.options.map((option, idx) => (
-            <li key={idx}>
-              <label
-                className={`flex items-center gap-2 p-3 border rounded-lg cursor-pointer transition ${
-                  answers[currentQuestion._id] === option
-                    ? "bg-blue-500 text-white border-blue-600"
-                    : "hover:bg-gray-200"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name={currentQuestion._id}
-                  value={option}
-                  checked={answers[currentQuestion._id] === option}
-                  onChange={() => handleAnswer(currentQuestion._id, option)}
-                  className="hidden"
-                />
-                {option}
-              </label>
-            </li>
+    <div className="p-6 max-w-lg mx-auto bg-gray-800 text-white rounded-xl shadow-lg mt-10">
+      <h2 className="text-2xl font-bold mb-4">Exam</h2>
+      <Timer duration={300} onTimeUp={handleSubmit} /> {/* 5-minute timer */}
+      {questions.length === 0 ? (
+        <p>Loading questions...</p>
+      ) : (
+        <form onSubmit={handleSubmit}>
+          {questions.map((q) => (
+            <div key={q._id} className="mb-4">
+              <p className="font-semibold">{q.question}</p>
+              {q.options.map((opt, i) => (
+                <label key={i} className="block">
+                  <input
+                    type="radio"
+                    name={q._id}
+                    value={i}
+                    onChange={() => handleChange(q._id, i)}
+                    className="mr-2"
+                    required
+                  />
+                  {opt}
+                </label>
+              ))}
+            </div>
           ))}
-        </ul>
 
-        {/* Navigation Buttons */}
-        <div className="flex justify-between mt-6">
+          {error && <p className="text-red-500">{error}</p>}
+
           <button
-            className="px-4 py-2 bg-gray-400 text-white rounded-lg disabled:opacity-50"
-            disabled={currentIndex === 0}
-            onClick={() => setCurrentIndex(currentIndex - 1)}
+            type="submit"
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 mt-4"
           >
-            ⬅ Prev
+            Submit Exam
           </button>
-
-          {currentIndex === questions.length - 1 ? (
-            <button
-              className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-              onClick={handleSubmit}
-            >
-              Submit Exam
-            </button>
-          ) : (
-            <button
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              onClick={() => setCurrentIndex(currentIndex + 1)}
-            >
-              Next ➡
-            </button>
-          )}
-        </div>
-      </div>
+        </form>
+      )}
     </div>
   );
 };

@@ -1,41 +1,49 @@
- 
 const mongoose = require("mongoose");
-const dotenv = require("dotenv");
-const Question = require("./models/questionModel"); // adjust path if needed
+const Question = require("./models/Question");
+require("dotenv").config();
 
-dotenv.config();
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log("MongoDB connected"))
+  .catch(err => console.error(err));
 
 const questions = [
   {
-    questionText: "What is 2 + 2?",
-    options: ["1", "2", "3", "4"],
-    correctAnswer: "4",
+    question: "What is 2 + 2?",
+    options: ["3", "4", "5", "6"],
+    answer: 1
   },
   {
-    questionText: "Which planet is known as the Red Planet?",
-    options: ["Earth", "Mars", "Jupiter", "Saturn"],
-    correctAnswer: "Mars",
+    question: "What is the capital of France?",
+    options: ["London", "Paris", "Berlin", "Madrid"],
+    answer: 1
   },
   {
-    questionText: "What is the capital of France?",
-    options: ["Paris", "Berlin", "London", "Rome"],
-    correctAnswer: "Paris",
+    question: "Which language is used in React?",
+    options: ["Python", "JavaScript", "C#", "Java"],
+    answer: 1
+  },
+  {
+    question: "HTML stands for?",
+    options: [
+      "Hyper Text Markup Language",
+      "Home Tool Markup Language",
+      "Hyperlinks Text Mark Language",
+      "None of the above",
+    ],
+    answer: 0
+  },
+  {
+    question: "CSS is used for?",
+    options: ["Styling", "Logic", "Database", "API"],
+    answer: 0
   },
 ];
 
-const seedQuestions = async () => {
-  try {
-    await mongoose.connect(process.env.MONGO_URI);
+async function seed() {
+  await Question.deleteMany(); // clear existing questions
+  await Question.insertMany(questions);
+  console.log("Questions added");
+  mongoose.disconnect();
+}
 
-    await Question.deleteMany(); // clear old questions
-    await Question.insertMany(questions);
-
-    console.log("✅ Questions seeded successfully!");
-    process.exit();
-  } catch (error) {
-    console.error("❌ Error seeding questions:", error);
-    process.exit(1);
-  }
-};
-
-seedQuestions();
+seed();
